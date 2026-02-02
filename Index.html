@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>📘 Textbook Engine</title>
+
+  <!-- KaTeX for LaTeX rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" crossorigin="anonymous">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" crossorigin="anonymous"></script>
+
+  <style>
+    :root {
+      --bg: #f8f9fa;
+      --panel: #ffffff;
+      --ink: #1a1a2e;
+      --ink-secondary: #4a4a68;
+      --muted: #6b7280;
+      --border: #e2e4e9;
+      --border-strong: #c9cdd4;
+      --shadow: 0 2px 12px rgba(0,0,0,.06);
+      --accent: #2563eb;
+      --accent-soft: #dbeafe;
+      
+      --hl-gray: #f3f4f6;
+      --hl-yellow: #fef9c3;
+      --hl-blue: #dbeafe;
+      --hl-green: #dcfce7;
+      --hl-red: #fee2e2;
+      --hl-purple: #f3e8ff;
+      --hl-orange: #ffedd5;
+      
+      --box-subtle: #ffffff;
+      --box-theorem: #f0f9ff;
+      --box-theorem-border: #0ea5e9;
+      --box-warning: #fef2f2;
+      --box-warning-border: #ef4444;
+      --box-example: #f0fdf4;
+      --box-example-border: #22c55e;
+      --box-exercise: #fefce8;
+      --box-exercise-border: #eab308;
+      --box-homework: #fdf4ff;
+      --box-homework-border: #a855f7;
+      --box-insight: #ecfeff;
+      --box-insight-border: #06b6d4;
+      --box-code: #1e293b;
+      --box-code-border: #475569;
+      --box-citation: #fafafa;
+      --box-citation-border: #a1a1aa;
+      --box-definition: #fffbeb;
+      --box-definition-border: #f59e0b;
+      --box-vocab: #fef3c7;
+      --box-vocab-border: #d97706;
+      --box-objectives: #e0f2fe;
+      --box-objectives-border: #0284c7;
+      --box-review: #f1f5f9;
+      --box-review-border: #64748b;
+      --box-experiment: #fdf2f8;
+      --box-experiment-border: #ec4899;
+      --box-author: #f5f3ff;
+      --box-author-border: #8b5cf6;
+      --box-aside: #f8fafc;
+      --box-aside-border: #94a3b8;
+      --box-tip: #f0fdfa;
+      --box-tip-border: #14b8a6;
+      --box-latex: #fefce8;
+      --box-latex-border: #ca8a04;
+      
+      --diff-easy: #22c55e;
+      --diff-medium: #eab308;
+      --diff-hard: #ef4444;
+      
+      --indent-step: 1.5rem;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --content-max-width: 72ch;
+    }
+    
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f1117;
+        --panel: #1a1d27;
+        --ink: #e8eaed;
+        --ink-secondary: #b8bcc8;
+        --muted: #9ca3af;
+        --border: #2d3140;
+        --border-strong: #3d4255;
+        --shadow: 0 2px 16px rgba(0,0,0,.4);
+        --accent: #60a5fa;
+        --accent-soft: #1e3a5f;
+        
+        --hl-gray: #1f2937;
+        --hl-yellow: #422006;
+        --hl-blue: #1e3a5f;
+        --hl-green: #14532d;
+        --hl-red: #450a0a;
+        --hl-purple: #3b0764;
+        --hl-orange: #431407;
+        
+        --box-subtle: #1a1d27;
+        --box-theorem: #0c1929;
+        --box-theorem-border: #0369a1;
+        --box-warning: #1c0a0a;
+        --box-warning-border: #b91c1c;
+        --box-example: #052e16;
+        --box-example-border: #15803d;
+        --box-exercise: #1a1703;
+        --box-exercise-border: #a16207;
+        --box-homework: #1a0a1f;
+        --box-homework-border: #7c3aed;
+        --box-insight: #083344;
+        --box-insight-border: #0891b2;
+        --box-code: #0f172a;
+        --box-code-border: #334155;
+        --box-citation: #18181b;
+        --box-citation-border: #52525b;
+        --box-definition: #1c1508;
+        --box-definition-border: #b45309;
+        --box-vocab: #1c1508;
+        --box-vocab-border: #b45309;
+        --box-objectives: #082f49;
+        --box-objectives-border: #0369a1;
+        --box-review: #1e293b;
+        --box-review-border: #475569;
+        --box-experiment: #1f0a14;
+        --box-experiment-border: #be185d;
+        --box-author: #1e1033;
+        --box-author-border: #7c3aed;
+        --box-aside: #1e293b;
+        --box-aside-border: #64748b;
+        --box-tip: #042f2e;
+        --box-tip-border: #0d9488;
+        --box-latex: #1c1508;
+        --box-latex-border: #a16207;
+      }
+    }
+    
+    * { box-sizing: border-box; }
+    
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+    }
+    
+    body {
+      font-family: "Source Serif 4", "Iowan Old Style", Palatino, Georgia, serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.6;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    header {
+      flex-shrink: 0;
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      z-index: 100;
+    }
+    
+    .bar {
+      display: flex;
+      gap: .75rem;
+      align-items: center;
+      padding: .75rem 1rem;
+      flex-wrap: wrap;
+    }
+    
+    .brand {
+      display: flex;
+      gap: .6rem;
+      align-items: baseline;
+      min-width: 220px;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+    
+    .brand .title { font-weight: 700; letter-spacing: .01em; }
+    .brand .sub { color: var(--muted); font-size: .8rem; white-space: nowrap; }
+    
+    .controls {
+      display: flex;
+      gap: .5rem;
+      align-items: center;
+      flex: 1;
+      flex-wrap: wrap;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+    
+    select, input[type="search"], button {
+      font-family: system-ui, -apple-system, sans-serif;
+      border: 1px solid var(--border);
+      background: var(--panel);
+      color: var(--ink);
+      border-radius: var(--radius-sm);
+      padding: .5rem .65rem;
+      font-size: .9rem;
+      outline: none;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    
+    select:focus, input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+    
+    input[type="search"] { min-width: 200px; flex: 1; }
+    
+    button {
+      cursor: pointer;
+      font-weight: 600;
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+    
+    button:hover { opacity: .9; }
+    button:disabled { opacity: .5; cursor: not-allowed; }
+    
+    button.secondary {
+      background: transparent;
+      color: var(--ink);
+      border-color: var(--border);
+    }
+    
+    button.secondary:hover { background: var(--hl-gray); }
+    
+    .status {
+      width: 100%;
+      padding: 0 1rem .6rem 1rem;
+      color: var(--muted);
+      font-size: .8rem;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+
+    main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 1rem;
+      padding: 1rem;
+      max-width: 1400px;
+      margin: 0 auto;
+      width: 100%;
+      min-height: 0;
+      overflow: hidden;
+    }
+    
+    nav {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      font-family: system-ui, -apple-system, sans-serif;
+      min-height: 0;
+      overflow: hidden;
+    }
+    
+    .navHead {
+      flex-shrink: 0;
+      padding: .75rem 1rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: .75rem;
+    }
+    
+    .navHead h2 {
+      margin: 0;
+      font-size: .8rem;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    
+    .tocMeta { font-size: .75rem; color: var(--muted); white-space: nowrap; }
+    
+    .toc {
+      margin: 0;
+      padding: .5rem 0;
+      list-style: none;
+      overflow-y: auto;
+      flex: 1;
+      font-size: .9rem;
+      min-height: 0;
+    }
+    
+    .toc-chapter-group { margin-bottom: .25rem; }
+    
+    .toc-chapter-header {
+      padding: .6rem 1rem;
+      font-weight: 700;
+      color: var(--ink);
+      background: var(--hl-gray);
+      border-left: 4px solid var(--accent);
+      cursor: pointer;
+      user-select: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background .15s;
+      font-size: .85rem;
+    }
+    
+    .toc-chapter-header:hover { background: var(--hl-blue); }
+    .toc-chapter-header.active { background: var(--accent-soft); color: var(--accent); }
+    .toc-chapter-header .chapter-toggle { font-size: .65rem; transition: transform .15s; }
+    .toc-chapter-header.collapsed .chapter-toggle { transform: rotate(-90deg); }
+    
+    .toc-chapter-sections { overflow: hidden; transition: max-height .2s ease-out; }
+    .toc-chapter-sections.collapsed { max-height: 0 !important; }
+    
+    .toc li {
+      padding: .4rem 1rem;
+      cursor: pointer;
+      border-left: 3px solid transparent;
+      user-select: none;
+      transition: background .1s, border-color .1s;
+    }
+    
+    .toc li:hover { background: var(--hl-gray); }
+    .toc li.active { border-left-color: var(--accent); background: var(--hl-gray); font-weight: 600; }
+    .toc .depth-1 { padding-left: 1rem; font-weight: 600; }
+    .toc .depth-2 { padding-left: 1.75rem; color: var(--ink-secondary); }
+    .toc .depth-3 { padding-left: 2.5rem; font-size: .85rem; color: var(--muted); }
+
+    article {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow-y: auto;
+      min-height: 0;
+      padding: 2rem;
+    }
+    
+    .content-wrapper { max-width: var(--content-max-width); margin: 0 auto; }
+
+    .block {
+      margin: 0 0 1.25rem 0;
+      padding: 1rem 1.25rem;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--panel);
+      position: relative;
+    }
+    
+    .block.noBorder { border: none; padding-left: 0; padding-right: 0; }
+    .block.nested-1 { margin-left: var(--indent-step); }
+    .block.nested-2 { margin-left: calc(var(--indent-step) * 2); }
+    .block.nested-3 { margin-left: calc(var(--indent-step) * 3); }
+
+    .render-block-header {
+      border: none;
+      padding: 2rem 0 1rem 0;
+      margin: 0 0 1.5rem 0;
+      text-align: center;
+    }
+    
+    .render-block-header .chapter-number {
+      display: block;
+      font-size: .9rem;
+      text-transform: uppercase;
+      letter-spacing: .15em;
+      color: var(--muted);
+      margin-bottom: .5rem;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+    
+    .render-block-header .h1 {
+      font-size: 2.5rem;
+      line-height: 1.15;
+      margin: 0;
+      font-weight: 700;
+      letter-spacing: -.01em;
+    }
+    
+    .render-block-header .chapter-divider {
+      width: 4rem;
+      height: 4px;
+      background: var(--accent);
+      border: none;
+      margin: 1.25rem auto 0 auto;
+      border-radius: 2px;
+    }
+
+    .render-section-header {
+      border: none;
+      padding: 0;
+      margin: 2.5rem 0 1rem 0;
+      border-left: 4px solid var(--accent);
+      padding-left: 1rem;
+    }
+    
+    .render-section-header .h2 { font-size: 1.5rem; line-height: 1.25; margin: 0; font-weight: 600; }
+
+    .render-body { border: none; padding: 0; margin: 0 0 1rem 0; background: transparent; }
+    .text { line-height: 1.7; max-width: var(--content-max-width); }
+    .text p { margin: 0 0 1rem 0; }
+
+    .labelRow {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin: 0 0 .75rem 0;
+      flex-wrap: wrap;
+    }
+    
+    .label {
+      display: inline-flex;
+      gap: .4rem;
+      align-items: center;
+      font-size: .8rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      font-weight: 700;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+    
+    .label .icon { font-size: 1rem; }
+    .label .numbered {
+      background: var(--accent);
+      color: white;
+      padding: .1rem .4rem;
+      border-radius: 4px;
+      font-size: .7rem;
+      margin-left: .25rem;
+    }
+
+    .badges { display: inline-flex; gap: .35rem; flex-wrap: wrap; justify-content: flex-end; }
+    
+    .badge {
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: .1rem .5rem;
+      font-size: .7rem;
+      color: var(--muted);
+      background: var(--panel);
+      font-family: system-ui, -apple-system, sans-serif;
+      text-transform: lowercase;
+    }
+    
+    .badge.difficulty { font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }
+    .badge.difficulty-easy { color: var(--diff-easy); border-color: var(--diff-easy); }
+    .badge.difficulty-medium { color: var(--diff-medium); border-color: var(--diff-medium); }
+    .badge.difficulty-hard { color: var(--diff-hard); border-color: var(--diff-hard); }
+    .badge.instructor-only { background: var(--hl-purple); color: #7c3aed; border-color: #7c3aed; }
+
+    .box-subtle { background: var(--box-subtle); }
+    .box-theorem { background: var(--box-theorem); border-left: 4px solid var(--box-theorem-border); }
+    .box-warning { background: var(--box-warning); border-left: 4px solid var(--box-warning-border); }
+    .box-example { background: var(--box-example); border-left: 4px solid var(--box-example-border); }
+    .box-exercise { background: var(--box-exercise); border-left: 4px solid var(--box-exercise-border); }
+    .box-homework { background: var(--box-homework); border-left: 4px solid var(--box-homework-border); }
+    .box-insight { background: var(--box-insight); border-left: 4px solid var(--box-insight-border); }
+    .box-code { background: var(--box-code); border-left: 4px solid var(--box-code-border); }
+    .box-citation { background: var(--box-citation); border-left: 4px solid var(--box-citation-border); }
+    .box-definition { background: var(--box-definition); border-left: 4px solid var(--box-definition-border); }
+    .box-vocab { background: var(--box-vocab); border-left: 4px solid var(--box-vocab-border); }
+    .box-objectives { background: var(--box-objectives); border-left: 4px solid var(--box-objectives-border); }
+    .box-review { background: var(--box-review); border-left: 4px solid var(--box-review-border); }
+    .box-experiment { background: var(--box-experiment); border-left: 4px solid var(--box-experiment-border); }
+    .box-author { background: var(--box-author); border-left: 4px solid var(--box-author-border); }
+    .box-aside { background: var(--box-aside); border-left: 4px solid var(--box-aside-border); }
+    .box-tip { background: var(--box-tip); border-left: 4px solid var(--box-tip-border); }
+    .box-latex { background: var(--box-latex); border-left: 4px solid var(--box-latex-border); }
+
+    .highlight-gray { background: var(--hl-gray); }
+    .highlight-yellow { background: var(--hl-yellow); }
+    .highlight-blue { background: var(--hl-blue); }
+    .highlight-green { background: var(--hl-green); }
+
+    .emphasis-low { opacity: .85; }
+    .emphasis-high { font-weight: 600; }
+
+    .smallcaps { font-variant: small-caps; letter-spacing: .04em; }
+    .monospace { font-family: "JetBrains Mono", "Fira Code", ui-monospace, Menlo, Monaco, Consolas, monospace; }
+
+    .formula {
+      font-family: "JetBrains Mono", "Fira Code", ui-monospace, Menlo, Monaco, Consolas, monospace;
+      font-size: .9rem;
+      line-height: 1.5;
+      background: var(--hl-gray);
+      border-radius: var(--radius-sm);
+      padding: 1rem;
+      border: 1px solid var(--border);
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    
+    .box-code .formula { background: #0f172a; color: #e2e8f0; border-color: var(--box-code-border); }
+
+    .latex-content { padding: 1rem; overflow-x: auto; text-align: center; }
+    .latex-content .katex-display { margin: 0; }
+    .latex-content .katex { font-size: 1.1em; }
+    .text .katex { font-size: 1em; }
+
+    .image-block { text-align: center; padding: 1rem; }
+    .image-block img { max-width: 100%; height: auto; border-radius: var(--radius-sm); box-shadow: var(--shadow); }
+    .image-block .image-caption { margin-top: .75rem; font-size: .9rem; color: var(--muted); font-style: italic; }
+    .image-block .image-error {
+      padding: 2rem;
+      background: var(--hl-red);
+      border-radius: var(--radius-sm);
+      color: var(--box-warning-border);
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+
+    .tombstone { display: block; text-align: right; margin-top: .75rem; font-size: 1rem; color: var(--muted); }
+
+    ul, ol { margin: .5rem 0; padding-left: 1.5rem; }
+    li { margin: .35rem 0; line-height: 1.6; }
+
+    details { border-radius: var(--radius-sm); }
+    details > summary {
+      cursor: pointer;
+      list-style: none;
+      font-weight: 600;
+      font-size: .85rem;
+      color: var(--accent);
+      padding: .25rem 0;
+      outline: none;
+      font-family: system-ui, -apple-system, sans-serif;
+      user-select: none;
+    }
+    details > summary::-webkit-details-marker { display: none; }
+    details > summary::before { content: "▶ "; font-size: .7rem; transition: transform .15s; display: inline-block; margin-right: .25rem; }
+    details[open] > summary::before { transform: rotate(90deg); }
+    details > .details-content { padding-top: .75rem; }
+
+    mark { background: #fde047; color: var(--ink); padding: 0 .15em; border-radius: 3px; }
+
+    .block-error {
+      background: var(--box-warning);
+      border: 1px dashed var(--box-warning-border);
+      color: var(--box-warning-border);
+      padding: 1rem;
+      border-radius: var(--radius);
+      font-family: system-ui, -apple-system, sans-serif;
+      font-size: .85rem;
+    }
+
+    hr.divider { border: none; border-top: 1px solid var(--border); margin: 1rem 0; }
+    hr.divider.heavy { border-top-width: 2px; }
+
+    @media (max-width: 900px) {
+      main { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+      nav { max-height: 250px; }
+      article { padding: 1.25rem; }
+      .render-block-header .h1 { font-size: 2rem; }
+    }
+
+    @media print {
+      header, nav { display: none; }
+      main { display: block; padding: 0; }
+      article { border: none; box-shadow: none; padding: 0; overflow: visible; }
+      .block { break-inside: avoid; }
+      details[open] > summary { display: none; }
+      details > .details-content { display: block !important; }
+    }
+  </style>
+</head>
+
+<body>
+<header>
+  <div class="bar">
+    <div class="brand" aria-label="Textbook Engine">
+      <div class="title">📘 Textbook Engine</div>
+      <div class="sub" id="specMeta">loading spec…</div>
+    </div>
+    <div class="controls" aria-label="Controls">
+      <select id="chapterSelect" aria-label="Chapter"></select>
+      <select id="viewSelect" aria-label="View mode">
+        <option value="student">Student View</option>
+        <option value="instructor">Instructor View</option>
+      </select>
+      <input id="searchBox" type="search" placeholder="Search this chapter…" aria-label="Search" maxlength="100" />
+      <button id="searchBtn" type="button">Search</button>
+      <button id="clearSearchBtn" class="secondary" type="button">Clear</button>
+      <button id="refreshBtn" class="secondary" type="button" title="Reload chapter">Reload</button>
+      <button id="autoBtn" class="secondary" type="button" title="Toggle auto-refresh">Auto: Off</button>
+    </div>
+  </div>
+  <div class="status" id="status">Initializing…</div>
+</header>
+
+<main>
+  <nav aria-label="Table of contents">
+    <div class="navHead">
+      <h2>Contents</h2>
+      <div class="tocMeta" id="tocMeta">—</div>
+    </div>
+    <ul class="toc" id="toc" role="listbox" tabindex="0"></ul>
+  </nav>
+  <article id="content" aria-label="Chapter content">
+    <div class="content-wrapper" id="contentWrapper">
+      <div class="muted">Loading…</div>
+    </div>
+  </article>
+</main>
+
+<script>
+/* ==========================================================
+   Textbook Engine v2.0.0 — LaTeX, Images, Full TOC, Independent Scroll
+   ========================================================== */
+(() => {
+  "use strict";
+
+  const SPEC_CANDIDATES = ["emoji_index.json", "textbook_emoji_index.json", "textbook_emojis.json"];
+  const CHAPTER_PATTERN = (n) => `chapter_${n}.txt`;
+  const ASSETS_BASE = "assets/";
+  const MAX_CHAPTER_PROBE = 200;
+  const MISS_STOP_THRESHOLD = 12;
+  const AUTO_REFRESH_MS = 2500;
+  const INDENT_SPACES_PER_LEVEL = 2;
+  const MAX_SEARCH_LENGTH = 100;
+
+  const el = {
+    specMeta: document.getElementById("specMeta"),
+    status: document.getElementById("status"),
+    chapterSelect: document.getElementById("chapterSelect"),
+    viewSelect: document.getElementById("viewSelect"),
+    toc: document.getElementById("toc"),
+    tocMeta: document.getElementById("tocMeta"),
+    content: document.getElementById("content"),
+    contentWrapper: document.getElementById("contentWrapper"),
+    searchBox: document.getElementById("searchBox"),
+    searchBtn: document.getElementById("searchBtn"),
+    clearSearchBtn: document.getElementById("clearSearchBtn"),
+    refreshBtn: document.getElementById("refreshBtn"),
+    autoBtn: document.getElementById("autoBtn"),
+  };
+
+  let SPEC = null;
+  let REGISTRY = null;
+  let CURRENT_CHAPTER = 1;
+  let CURRENT_TEXT = "";
+  let CURRENT_BLOCKS = [];
+  let VIEW_MODE = "student";
+  let AUTO_TIMER = null;
+  let LAST_RENDER_HASH = "";
+  let ALL_CHAPTERS = [];
+  let ALL_CHAPTERS_DATA = new Map();
+  
+  let COUNTERS = { chapter: 0, theorem: 0, example: 0, definition: 0 };
+
+  const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+  const hashString = (s) => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return String(h >>> 0); };
+  const setStatus = (msg) => { el.status.textContent = msg; };
+  const escapeHtml = (s) => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const slugify = (s) => String(s).toLowerCase().trim().replace(/[\s]+/g, "-").replace(/[^a-z0-9\-]/g, "").replace(/\-+/g, "-").replace(/^\-|\-$/g, "");
+
+  const segmenter = (() => { try { return new Intl.Segmenter("en", { granularity: "grapheme" }); } catch { return null; } })();
+  const graphemes = (s) => segmenter ? Array.from(segmenter.segment(s), seg => seg.segment) : Array.from(s);
+  const isExtendedPictographic = (g) => { try { return /\p{Extended_Pictographic}/u.test(g); } catch { return (g.codePointAt(0) || 0) >= 0x1F000; } };
+  const normalizeEmoji = (e) => e.replace(/[\uFE00-\uFE0F]/g, "");
+
+  function indentLevelOfLine(line, spacesPerLevel = INDENT_SPACES_PER_LEVEL) {
+    const m = line.match(/^([ \t]*)/);
+    const raw = m ? m[1] : "";
+    return Math.floor(raw.replace(/\t/g, "  ").length / Math.max(1, spacesPerLevel));
+  }
+
+  // LaTeX rendering
+  function renderLatex(content, displayMode = true) {
+    if (typeof katex === 'undefined') return `<pre>${escapeHtml(content)}</pre>`;
+    try {
+      return katex.renderToString(content, { displayMode, throwOnError: false, errorColor: '#ef4444', trust: true, strict: false });
+    } catch (err) { return `<pre class="latex-error">${escapeHtml(content)}</pre>`; }
+  }
+
+  function processInlineLatex(text) {
+    if (typeof katex === 'undefined') return escapeHtml(text);
+    let result = text.replace(/\$\$([^$]+)\$\$/g, (match, latex) => {
+      try { return katex.renderToString(latex.trim(), { displayMode: true, throwOnError: false, errorColor: '#ef4444' }); }
+      catch { return `<code>${escapeHtml(latex)}</code>`; }
+    });
+    result = result.replace(/\$([^$]+)\$/g, (match, latex) => {
+      try { return katex.renderToString(latex.trim(), { displayMode: false, throwOnError: false, errorColor: '#ef4444' }); }
+      catch { return `<code>${escapeHtml(latex)}</code>`; }
+    });
+    return result;
+  }
+
+  async function fetchJson(path) {
+    const res = await fetch(path, { cache: "no-store" });
+    if (!res.ok) throw new Error(`Failed to fetch ${path}: ${res.status}`);
+    return res.json();
+  }
+
+  async function loadSpec() {
+    let lastErr = null;
+    for (const path of SPEC_CANDIDATES) {
+      try { return { spec: await fetchJson(path), path }; }
+      catch (e) { lastErr = e; }
+    }
+    throw lastErr || new Error("No spec JSON found.");
+  }
+
+  function buildRegistry(spec) {
+    const map = new Map();
+    const categories = ["structure", "academic", "pedagogy", "voice", "metadata", "media"];
+    for (const cat of categories) {
+      const obj = spec[cat] || {};
+      for (const [emoji, entry] of Object.entries(obj)) {
+        const normalized = normalizeEmoji(emoji);
+        const entryData = { ...entry, __category: cat, __emoji: emoji };
+        map.set(emoji, entryData);
+        if (normalized !== emoji) map.set(normalized, entryData);
+      }
+    }
+    return map;
+  }
+
+  async function tryFetchText(path) {
+    try { const res = await fetch(path, { cache: "no-store" }); if (!res.ok) return null; return res.text(); }
+    catch { return null; }
+  }
+
+  async function discoverChapters() {
+    const found = [];
+    let misses = 0, started = false;
+    for (let n = 1; n <= MAX_CHAPTER_PROBE; n++) {
+      const text = await tryFetchText(CHAPTER_PATTERN(n));
+      if (text != null) { found.push(n); started = true; misses = 0; }
+      else { if (started) misses++; if (started && misses >= MISS_STOP_THRESHOLD) break; }
+      if (n % 25 === 0) await sleep(40);
+    }
+    return found;
+  }
+
+  function populateChapterSelect(chapters) {
+    el.chapterSelect.innerHTML = "";
+    if (!chapters.length) {
+      const opt = document.createElement("option");
+      opt.value = "1"; opt.textContent = "No chapters found";
+      el.chapterSelect.appendChild(opt);
+      el.chapterSelect.disabled = true;
+      return;
+    }
+    el.chapterSelect.disabled = false;
+    for (const n of chapters) {
+      const opt = document.createElement("option");
+      opt.value = String(n); opt.textContent = `Chapter ${n}`;
+      el.chapterSelect.appendChild(opt);
+    }
+  }
+
+  function parseLeadingEmojis(line) {
+    const raw = line.replace(/^\s+/, "");
+    const gs = graphemes(raw);
+    if (!gs.length) return { primary: null, tags: [], rest: raw };
+    const first = gs[0], normalizedFirst = normalizeEmoji(first);
+    if (!REGISTRY.has(first) && !REGISTRY.has(normalizedFirst)) return { primary: null, tags: [], rest: raw };
+    const primary = REGISTRY.has(first) ? first : normalizedFirst;
+    const tags = [];
+    let idx = 1;
+    while (idx < gs.length) {
+      const g = gs[idx];
+      if (g.trim() === "") break;
+      if (isExtendedPictographic(g)) { tags.push(g); idx++; continue; }
+      break;
+    }
+    return { primary, tags, rest: gs.slice(idx).join("").trimStart() };
+  }
+
+  function buildTreeFromText(text, chapterNumOverride = null) {
+    const lines = text.replace(/\r\n/g, "\n").split("\n");
+    const fenceOpen = SPEC?.meta?.fence_tokens?.open ?? "{{{";
+    const fenceClose = SPEC?.meta?.fence_tokens?.close ?? "}}}";
+
+    const root = { emoji: null, name: "Root", render: "root", scope: { mode: "block" }, behavior: [], visibility: { student: true, instructor: true }, tags: [], contentLines: [], content: "", children: [], id: null, depth: 0 };
+
+    let currentChapter = null, currentSection = null, base = root;
+    let stack = [{ node: base, indent: -1, sentinel: true }];
+    let fenceState = { awaitingOpen: false, inFence: false };
+
+    const finalizeNode = (node) => { node.content = node.contentLines.join("\n").replace(/\s+$/g, ""); };
+    const closeTop = () => { const top = stack[stack.length - 1]; if (!top || top.sentinel) return; finalizeNode(top.node); stack.pop(); fenceState = { awaitingOpen: false, inFence: false }; };
+    const closeAllOpenBlocks = () => { while (stack.length > 1) closeTop(); };
+    const resetBase = (newBase) => { closeAllOpenBlocks(); base = newBase; stack = [{ node: base, indent: -1, sentinel: true }]; fenceState = { awaitingOpen: false, inFence: false }; };
+    const attachChild = (parent, child) => { parent.children = parent.children || []; parent.children.push(child); child.depth = (parent.depth || 0) + 1; };
+
+    const makeNodeFromEmoji = (emoji, tags, firstLineRest) => {
+      const entry = REGISTRY.get(emoji) || REGISTRY.get(normalizeEmoji(emoji));
+      return {
+        emoji, tags: tags || [], entry,
+        scope: entry?.scope || { mode: "block" },
+        behavior: Array.isArray(entry?.behavior) ? entry.behavior : [],
+        visibility: entry?.visibility || { student: true, instructor: true },
+        render: entry?.render || "block",
+        toc: !!entry?.toc,
+        toc_behavior: entry?.toc_behavior || null,
+        name: entry?.name || emoji,
+        contentLines: firstLineRest ? [firstLineRest] : [],
+        content: "", children: [], id: null, depth: 0
+      };
+    };
+
+    const makeImplicitBodyNode = (line) => ({ emoji: null, tags: [], entry: null, scope: { mode: "block" }, behavior: [], visibility: { student: true, instructor: true }, render: "body", toc: false, toc_behavior: null, name: "Body", contentLines: [line], content: "", children: [], id: null, depth: 0 });
+    const computeStructuralBase = () => currentSection || currentChapter || root;
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i], trimmed = line.trim(), blank = trimmed.length === 0;
+      const marker = parseLeadingEmojis(line);
+      const topFrame = stack[stack.length - 1], topNode = topFrame?.node;
+
+      if (topNode && topNode.scope?.mode === "fenced") {
+        if (!fenceState.inFence) {
+          if (blank) continue;
+          if (trimmed === fenceOpen) { fenceState.inFence = true; continue; }
+          topNode.scope = { ...topNode.scope, mode: "block" }; topNode.contentLines.push(line); continue;
+        } else {
+          if (trimmed === fenceClose) { closeTop(); continue; }
+          topNode.contentLines.push(line); continue;
+        }
+      }
+
+      if (topNode && topNode.scope?.mode === "paragraph" && blank) { closeTop(); continue; }
+
+      if (marker.primary) {
+        const { primary: emoji, tags, rest } = marker;
+
+        if (normalizeEmoji(emoji) === "📘") {
+          resetBase(root);
+          if (chapterNumOverride != null) COUNTERS.chapter = chapterNumOverride;
+          else COUNTERS.chapter++;
+          COUNTERS.theorem = 0; COUNTERS.example = 0; COUNTERS.definition = 0;
+          const chap = makeNodeFromEmoji(emoji, tags, rest);
+          chap.chapterNumber = COUNTERS.chapter;
+          finalizeNode(chap); attachChild(root, chap);
+          currentChapter = chap; currentSection = null; resetBase(currentChapter);
+          continue;
+        }
+
+        if (normalizeEmoji(emoji) === "📚") {
+          closeAllOpenBlocks();
+          const parent = currentChapter || root;
+          const sec = makeNodeFromEmoji(emoji, tags, rest);
+          finalizeNode(sec); attachChild(parent, sec);
+          currentSection = sec; resetBase(currentSection);
+          continue;
+        }
+
+        const structuralBase = computeStructuralBase();
+        if (base !== structuralBase) resetBase(structuralBase);
+        const indent = indentLevelOfLine(line);
+        while (stack.length > 1 && stack[stack.length - 1].indent >= indent) closeTop();
+        const parent = stack[stack.length - 1].node;
+        const node = makeNodeFromEmoji(emoji, tags, rest);
+        attachChild(parent, node);
+        if (node.scope?.mode === "line") { finalizeNode(node); continue; }
+        stack.push({ node, indent, sentinel: false });
+        if (node.scope?.mode === "fenced") fenceState = { awaitingOpen: true, inFence: false };
+        continue;
+      }
+
+      if (stack.length > 1) { stack[stack.length - 1].node.contentLines.push(line); }
+      else {
+        const structuralBase = computeStructuralBase();
+        if (base !== structuralBase) resetBase(structuralBase);
+        if (blank && base.children.length === 0) continue;
+        const body = makeImplicitBodyNode(line);
+        attachChild(base, body);
+        stack.push({ node: body, indent: 0, sentinel: false });
+      }
+    }
+    closeAllOpenBlocks();
+    return root;
+  }
+
+  function flattenTree(root) {
+    const out = [];
+    const visit = (node, structuralDepth) => {
+      if (node && node.render !== "root") { node.structuralDepth = structuralDepth; out.push(node); }
+      const kids = node.children || [];
+      const nextDepth = (node.render === "block-header" || node.render === "section-header") ? structuralDepth : structuralDepth + 1;
+      for (const k of kids) visit(k, nextDepth);
+    };
+    visit(root, 0);
+    return out;
+  }
+
+  function extractChapterTitle(blocks) {
+    const chapterBlock = blocks.find(b => b.render === "block-header");
+    return chapterBlock ? ((chapterBlock.content || "").trim() || chapterBlock.name) : null;
+  }
+
+  function getBehaviorValue(behavior, callName) { const hit = (behavior || []).find(b => b && b.call === callName); return hit ? (hit.value ?? true) : null; }
+  function hasBehavior(behavior, callName) { return (behavior || []).some(b => b && b.call === callName); }
+
+  function ensureId(block, usedIds) {
+    if (block.id) return block.id;
+    if (!hasBehavior(block.behavior, "id")) return null;
+    const seed = (block.contentLines?.[0] || block.content || block.name || "block").slice(0, 120);
+    const base = slugify(seed) || "block";
+    let id = base, k = 2;
+    while (usedIds.has(id)) id = `${base}-${k++}`;
+    usedIds.add(id); block.id = id;
+    return id;
+  }
+
+  function makeBadges(block) {
+    const wrap = document.createElement("div"); wrap.className = "badges";
+    const difficulty = getBehaviorValue(block.behavior, "difficulty");
+    if (difficulty) { const bd = document.createElement("span"); bd.className = `badge difficulty difficulty-${difficulty}`; bd.textContent = difficulty; wrap.appendChild(bd); }
+    if (hasBehavior(block.behavior, "instructor-only")) { const bd = document.createElement("span"); bd.className = "badge instructor-only"; bd.textContent = "👁 instructor"; wrap.appendChild(bd); }
+    for (const b of (block.behavior || [])) { if (b && b.call === "tag" && typeof b.value === "string") { const bd = document.createElement("span"); bd.className = "badge"; bd.textContent = b.value; wrap.appendChild(bd); } }
+    for (const t of (block.tags || [])) { const bd = document.createElement("span"); bd.className = "badge"; bd.textContent = t; wrap.appendChild(bd); }
+    return wrap;
+  }
+
+  function renderBlock(block, usedIds) {
+    const visible = (VIEW_MODE === "student") ? (block.visibility?.student !== false) : (block.visibility?.instructor !== false);
+    if (!visible) return null;
+
+    const wrapper = document.createElement("section");
+    const renderType = block.render || "block";
+    wrapper.className = ["block", `render-${renderType}`, (renderType === "block-header" || renderType === "section-header" || renderType === "body") ? "noBorder" : ""].filter(Boolean).join(" ");
+
+    const nestLevel = Math.min((block.structuralDepth || 1) - 1, 3);
+    if (nestLevel > 0 && renderType !== "block-header" && renderType !== "section-header" && renderType !== "body") wrapper.classList.add(`nested-${nestLevel}`);
+
+    const box = getBehaviorValue(block.behavior, "box"); if (box) wrapper.classList.add(`box-${box}`);
+    const hl = getBehaviorValue(block.behavior, "highlight"); if (hl) wrapper.classList.add(`highlight-${hl}`);
+    const emph = getBehaviorValue(block.behavior, "emphasis"); if (emph) wrapper.classList.add(`emphasis-${emph}`);
+    if (hasBehavior(block.behavior, "bold")) wrapper.style.fontWeight = "600";
+    if (hasBehavior(block.behavior, "italic")) wrapper.style.fontStyle = "italic";
+    if (hasBehavior(block.behavior, "underline")) wrapper.style.textDecoration = "underline";
+    if (hasBehavior(block.behavior, "smallcaps")) wrapper.classList.add("smallcaps");
+    if (hasBehavior(block.behavior, "monospace")) wrapper.classList.add("monospace");
+
+    const id = ensureId(block, usedIds); if (id) wrapper.id = id;
+
+    const collapseVal = getBehaviorValue(block.behavior, "collapse"), wantsCollapse = collapseVal != null;
+    const listVal = getBehaviorValue(block.behavior, "list");
+    const wantsFormula = hasBehavior(block.behavior, "formula");
+    const wantsTombstone = hasBehavior(block.behavior, "tombstone");
+    const wantsLatex = hasBehavior(block.behavior, "latex");
+    const wantsImage = hasBehavior(block.behavior, "image");
+    const iconVal = getBehaviorValue(block.behavior, "icon");
+    const numberedType = getBehaviorValue(block.behavior, "numbered");
+
+    // Chapter Header
+    if (renderType === "block-header") {
+      const chapterNum = block.chapterNumber || "";
+      if (chapterNum) { const numSpan = document.createElement("span"); numSpan.className = "chapter-number"; numSpan.textContent = `Chapter ${chapterNum}`; wrapper.appendChild(numSpan); }
+      const h = document.createElement("h1"); h.className = "h1"; h.textContent = (block.content || "").trim() || block.name; wrapper.appendChild(h);
+      const divider = document.createElement("hr"); divider.className = "chapter-divider"; wrapper.appendChild(divider);
+      return wrapper;
+    }
+
+    // Section Header
+    if (renderType === "section-header") {
+      const h = document.createElement("h2"); h.className = "h2"; h.textContent = (block.content || "").trim() || block.name; wrapper.appendChild(h);
+      return wrapper;
+    }
+
+    // Body
+    if (renderType === "body") {
+      const content = (block.content || "").trim(); if (!content) return null;
+      const p = document.createElement("div"); p.className = "text"; p.innerHTML = processInlineLatex(content); wrapper.appendChild(p);
+      return wrapper;
+    }
+
+    // Image Block
+    if (renderType === "image-block" || wantsImage) {
+      const content = (block.content || "").trim();
+      const imageBlock = document.createElement("div"); imageBlock.className = "image-block";
+      const match = content.match(/^(\S+)(?:\s+(.+))?$/);
+      if (match) {
+        const imagePath = match[1], caption = match[2] || "";
+        const img = document.createElement("img"); img.src = ASSETS_BASE + imagePath; img.alt = caption || imagePath; img.loading = "lazy";
+        img.onerror = () => { img.style.display = "none"; const errDiv = document.createElement("div"); errDiv.className = "image-error"; errDiv.textContent = `⚠️ Image not found: ${ASSETS_BASE}${imagePath}`; imageBlock.insertBefore(errDiv, imageBlock.firstChild); };
+        imageBlock.appendChild(img);
+        if (caption) { const capDiv = document.createElement("div"); capDiv.className = "image-caption"; capDiv.textContent = caption; imageBlock.appendChild(capDiv); }
+      } else {
+        const errDiv = document.createElement("div"); errDiv.className = "image-error"; errDiv.textContent = "⚠️ Invalid image syntax. Use: 🖼️ path/to/image.png [optional caption]"; imageBlock.appendChild(errDiv);
+      }
+      wrapper.appendChild(imageBlock);
+      return wrapper;
+    }
+
+    // LaTeX Block
+    if (renderType === "latex-block" || wantsLatex) {
+      const labelRow = document.createElement("div"); labelRow.className = "labelRow";
+      const label = document.createElement("div"); label.className = "label";
+      const iconSpan = document.createElement("span"); iconSpan.className = "icon"; iconSpan.textContent = "🖋️"; label.appendChild(iconSpan);
+      const nameSpan = document.createElement("span"); nameSpan.textContent = "LaTeX"; label.appendChild(nameSpan);
+      labelRow.appendChild(label); labelRow.appendChild(makeBadges(block)); wrapper.appendChild(labelRow);
+      const latexContent = document.createElement("div"); latexContent.className = "latex-content"; latexContent.innerHTML = renderLatex((block.content || "").trim(), true); wrapper.appendChild(latexContent);
+      return wrapper;
+    }
+
+    // All Other Blocks
+    const labelRow = document.createElement("div"); labelRow.className = "labelRow";
+    const label = document.createElement("div"); label.className = "label";
+    if (iconVal) { const iconSpan = document.createElement("span"); iconSpan.className = "icon"; iconSpan.textContent = iconVal; label.appendChild(iconSpan); }
+    const nameSpan = document.createElement("span"); nameSpan.textContent = block.name; label.appendChild(nameSpan);
+    if (numberedType) { COUNTERS[numberedType] = (COUNTERS[numberedType] || 0) + 1; const numSpan = document.createElement("span"); numSpan.className = "numbered"; numSpan.textContent = `${COUNTERS.chapter}.${COUNTERS[numberedType]}`; label.appendChild(numSpan); }
+    labelRow.appendChild(label); labelRow.appendChild(makeBadges(block));
+
+    const contentHost = document.createElement("div");
+    if (listVal) {
+      const lines = (block.content || "").split("\n").map(s => s.trim()).filter(Boolean);
+      const items = lines.map(s => s.replace(/^(\-|\*|•|\d+[\.\)]\s*)/, ""));
+      let listEl; if (listVal === "numbered") listEl = document.createElement("ol"); else if (listVal === "alpha") { listEl = document.createElement("ol"); listEl.type = "a"; } else listEl = document.createElement("ul");
+      for (const it of items) { const li = document.createElement("li"); li.innerHTML = processInlineLatex(it); listEl.appendChild(li); }
+      contentHost.appendChild(listEl);
+    } else if (wantsFormula || renderType === "code-block") {
+      const pre = document.createElement("pre"); pre.className = "formula"; pre.textContent = (block.content || "").trim(); contentHost.appendChild(pre);
+    } else {
+      const p = document.createElement("div"); p.className = "text"; p.innerHTML = processInlineLatex((block.content || "").trim()); contentHost.appendChild(p);
+    }
+
+    if (wantsTombstone) { const tomb = document.createElement("div"); tomb.className = "tombstone"; tomb.textContent = "∎"; contentHost.appendChild(tomb); }
+
+    if (wantsCollapse) {
+      wrapper.appendChild(labelRow);
+      const details = document.createElement("details"); if (collapseVal === "open") details.open = true;
+      const summary = document.createElement("summary"); summary.textContent = `Show ${block.name}`; details.appendChild(summary);
+      const detailsContent = document.createElement("div"); detailsContent.className = "details-content"; detailsContent.appendChild(contentHost); details.appendChild(detailsContent);
+      wrapper.appendChild(details);
+    } else { wrapper.appendChild(labelRow); wrapper.appendChild(contentHost); }
+
+    return wrapper;
+  }
+
+  function buildFullTOC() {
+    el.toc.innerHTML = "";
+    let totalItems = 0;
+
+    for (const chapterNum of ALL_CHAPTERS) {
+      const chapterData = ALL_CHAPTERS_DATA.get(chapterNum);
+      if (!chapterData) continue;
+      const { blocks, title } = chapterData;
+      const isCurrentChapter = chapterNum === CURRENT_CHAPTER;
+
+      const groupDiv = document.createElement("div");
+      groupDiv.className = "toc-chapter-group";
+      groupDiv.dataset.chapter = String(chapterNum);
+
+      const chapterHeader = document.createElement("div");
+      chapterHeader.className = `toc-chapter-header${isCurrentChapter ? ' active' : ''}${!isCurrentChapter ? ' collapsed' : ''}`;
+      chapterHeader.innerHTML = `<span>Ch. ${chapterNum}: ${escapeHtml(title || 'Untitled')}</span><span class="chapter-toggle">▼</span>`;
+
+      chapterHeader.addEventListener("click", () => {
+        if (chapterNum !== CURRENT_CHAPTER) {
+          el.chapterSelect.value = String(chapterNum);
+          LAST_RENDER_HASH = "";
+          loadChapter(chapterNum);
+        } else {
+          const sectionsDiv = groupDiv.querySelector(".toc-chapter-sections");
+          const isCollapsed = chapterHeader.classList.toggle("collapsed");
+          if (isCollapsed) sectionsDiv.classList.add("collapsed");
+          else sectionsDiv.classList.remove("collapsed");
+        }
+      });
+
+      groupDiv.appendChild(chapterHeader);
+
+      const sectionsDiv = document.createElement("div");
+      sectionsDiv.className = `toc-chapter-sections${!isCurrentChapter ? ' collapsed' : ''}`;
+      let sectionCount = 0, n1 = chapterNum, n2 = 0;
+
+      for (const b of blocks) {
+        if (!b.toc) continue;
+        const visible = (VIEW_MODE === "student") ? (b.visibility?.student !== false) : (b.visibility?.instructor !== false);
+        if (!visible) continue;
+        const depth = b.toc_behavior?.depth ?? 2;
+        if (depth === 1) continue;
+        if (depth === 2) n2++;
+        const num = (b.toc_behavior?.numbered) ? `${n1}.${n2}.` : "";
+        if (!b.id) continue;
+
+        const li = document.createElement("li");
+        li.className = `depth-${depth}`;
+        li.dataset.target = b.id;
+        li.dataset.chapter = String(chapterNum);
+        li.setAttribute("role", "option");
+        li.textContent = `${num} ${(b.content || b.name || "").trim()}`.trim();
+
+        li.addEventListener("click", async (e) => {
+          e.stopPropagation();
+          if (chapterNum !== CURRENT_CHAPTER) {
+            el.chapterSelect.value = String(chapterNum);
+            LAST_RENDER_HASH = "";
+            await loadChapter(chapterNum);
+          }
+          setTimeout(() => { const node = document.getElementById(b.id); if (node) node.scrollIntoView({ behavior: "smooth", block: "start" }); }, 50);
+        });
+
+        sectionsDiv.appendChild(li);
+        sectionCount++;
+        totalItems++;
+      }
+
+      sectionsDiv.style.maxHeight = isCurrentChapter ? `${sectionCount * 40}px` : "0";
+      groupDiv.appendChild(sectionsDiv);
+      el.toc.appendChild(groupDiv);
+    }
+
+    el.tocMeta.textContent = `${ALL_CHAPTERS.length} ch, ${totalItems} sec`;
+  }
+
+  function activateTOCOnScroll() {
+    const tocLis = Array.from(el.toc.querySelectorAll(`li[data-chapter="${CURRENT_CHAPTER}"]`));
+    if (!tocLis.length) return;
+    const targets = tocLis.map(li => ({ li, id: li.dataset.target, el: document.getElementById(li.dataset.target) })).filter(x => x.el);
+    const onScroll = () => {
+      const y = el.content.scrollTop;
+      let best = null;
+      for (const t of targets) { const rect = t.el.getBoundingClientRect(); const host = el.content.getBoundingClientRect(); const top = rect.top - host.top + y; if (top <= y + 50) best = t; else break; }
+      tocLis.forEach(li => li.classList.remove("active"));
+      if (best) best.li.classList.add("active");
+    };
+    el.content.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+  }
+
+  function setupTOCKeyboard() {
+    el.toc.addEventListener("keydown", (e) => {
+      const items = Array.from(el.toc.querySelectorAll("li"));
+      if (!items.length) return;
+      const active = el.toc.querySelector("li.active") || items[0];
+      const idx = items.indexOf(active);
+      if (e.key === "ArrowDown" && idx < items.length - 1) { e.preventDefault(); items[idx + 1].click(); }
+      else if (e.key === "ArrowUp" && idx > 0) { e.preventDefault(); items[idx - 1].click(); }
+      else if (e.key === "Enter") { e.preventDefault(); active.click(); }
+    });
+  }
+
+  function clearHighlights() { renderChapter(CURRENT_TEXT); }
+
+  function highlightMatches(query) {
+    if (!query) return;
+    const walker = document.createTreeWalker(el.contentWrapper, NodeFilter.SHOW_TEXT, null);
+    const re = new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "ig");
+    let count = 0;
+    const textNodes = [];
+    while (walker.nextNode()) textNodes.push(walker.currentNode);
+    for (const node of textNodes) {
+      const parent = node.parentNode;
+      if (!parent || parent.nodeName === "SCRIPT" || parent.nodeName === "STYLE") continue;
+      const val = node.nodeValue;
+      if (!val || !re.test(val)) continue;
+      re.lastIndex = 0;
+      const parts = [];
+      let last = 0, m;
+      while ((m = re.exec(val)) !== null) {
+        const start = m.index, end = start + m[0].length;
+        if (start > last) parts.push(document.createTextNode(val.slice(last, start)));
+        const mark = document.createElement("mark"); mark.textContent = val.slice(start, end); parts.push(mark); count++; last = end;
+        if (m.index === re.lastIndex) re.lastIndex++;
+      }
+      if (last < val.length) parts.push(document.createTextNode(val.slice(last)));
+      const span = document.createElement("span");
+      for (const p of parts) span.appendChild(p);
+      parent.replaceChild(span, node);
+    }
+    setStatus(`Search: "${query}" — ${count} match(es)`);
+    const firstMark = el.contentWrapper.querySelector("mark");
+    if (firstMark) firstMark.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+
+  function renderChapter(text) {
+    CURRENT_TEXT = text;
+    COUNTERS = { chapter: CURRENT_CHAPTER - 1, theorem: 0, example: 0, definition: 0 };
+    const tree = buildTreeFromText(text, CURRENT_CHAPTER);
+    const blocks = flattenTree(tree);
+    const usedIds = new Set();
+    for (const b of blocks) ensureId(b, usedIds);
+    CURRENT_BLOCKS = blocks;
+    const title = extractChapterTitle(blocks);
+    ALL_CHAPTERS_DATA.set(CURRENT_CHAPTER, { text, blocks, title });
+
+    el.contentWrapper.innerHTML = "";
+    buildFullTOC();
+
+    const frag = document.createDocumentFragment();
+    for (const b of blocks) {
+      try { const node = renderBlock(b, usedIds); if (node) frag.appendChild(node); }
+      catch (err) { console.error("Failed to render block:", b, err); const errNode = document.createElement("div"); errNode.className = "block-error"; errNode.textContent = `⚠️ Render error: ${b.name || "Unknown block"} — ${err.message}`; frag.appendChild(errNode); }
+    }
+    el.contentWrapper.appendChild(frag);
+    activateTOCOnScroll();
+    el.content.scrollTop = 0;
+  }
+
+  async function loadChapter(n) {
+    CURRENT_CHAPTER = n;
+    setStatus(`Loading chapter_${n}.txt…`);
+    const path = CHAPTER_PATTERN(n);
+    const text = await tryFetchText(path);
+    if (text == null) {
+      el.contentWrapper.innerHTML = `<div class="block-error">Missing file: <code>${escapeHtml(path)}</code><br><br>Make sure the file exists in the same directory as index.html.</div>`;
+      el.toc.innerHTML = "";
+      el.tocMeta.textContent = "—";
+      setStatus(`Missing: ${path}`);
+      return;
+    }
+    const h = hashString(text);
+    if (h === LAST_RENDER_HASH) { setStatus(`Up to date — ${path}`); return; }
+    LAST_RENDER_HASH = h;
+    renderChapter(text);
+    setStatus(`Loaded ${path} — ${CURRENT_BLOCKS.length} blocks`);
+  }
+
+  async function loadAllChaptersData() {
+    setStatus("Loading all chapters for TOC…");
+    for (const chapterNum of ALL_CHAPTERS) {
+      if (ALL_CHAPTERS_DATA.has(chapterNum)) continue;
+      const text = await tryFetchText(CHAPTER_PATTERN(chapterNum));
+      if (text) {
+        const savedCounters = { ...COUNTERS };
+        COUNTERS = { chapter: chapterNum - 1, theorem: 0, example: 0, definition: 0 };
+        const tree = buildTreeFromText(text, chapterNum);
+        const blocks = flattenTree(tree);
+        const usedIds = new Set();
+        for (const b of blocks) ensureId(b, usedIds);
+        const title = extractChapterTitle(blocks);
+        ALL_CHAPTERS_DATA.set(chapterNum, { text, blocks, title });
+        COUNTERS = savedCounters;
+      }
+    }
+    setStatus("All chapters loaded");
+  }
+
+  function setAuto(on) {
+    if (AUTO_TIMER) { clearInterval(AUTO_TIMER); AUTO_TIMER = null; }
+    if (on) { AUTO_TIMER = setInterval(() => { loadChapter(CURRENT_CHAPTER).catch(() => {}); }, AUTO_REFRESH_MS); el.autoBtn.textContent = "Auto: On"; }
+    else { el.autoBtn.textContent = "Auto: Off"; }
+  }
+
+  async function init() {
+    setStatus("Loading spec…");
+    try {
+      const { spec, path } = await loadSpec();
+      SPEC = spec;
+      REGISTRY = buildRegistry(spec);
+      el.specMeta.textContent = `${spec.meta?.name || "Spec"} v${spec.meta?.version || "?"} — ${path}`;
+
+      setStatus("Discovering chapters…");
+      ALL_CHAPTERS = await discoverChapters();
+      populateChapterSelect(ALL_CHAPTERS);
+
+      if (ALL_CHAPTERS.length) {
+        el.chapterSelect.value = String(ALL_CHAPTERS[0]);
+        CURRENT_CHAPTER = ALL_CHAPTERS[0];
+        await loadChapter(CURRENT_CHAPTER);
+        setTimeout(async () => { await loadAllChaptersData(); buildFullTOC(); }, 100);
+      } else {
+        el.contentWrapper.innerHTML = `<div class="block-error"><strong>No chapter files found.</strong><br><br>The engine expects files named <code>chapter_1.txt</code>, <code>chapter_2.txt</code>, etc.<br><br>Make sure you're serving this via HTTP (not file://).</div>`;
+        setStatus("No chapters found.");
+      }
+
+      el.chapterSelect.addEventListener("change", async () => { const n = Number(el.chapterSelect.value || 1); LAST_RENDER_HASH = ""; await loadChapter(n); });
+      el.viewSelect.addEventListener("change", () => { VIEW_MODE = el.viewSelect.value; LAST_RENDER_HASH = ""; renderChapter(CURRENT_TEXT || ""); setStatus(`View: ${VIEW_MODE}`); });
+      el.refreshBtn.addEventListener("click", async () => { LAST_RENDER_HASH = ""; await loadChapter(CURRENT_CHAPTER); });
+      el.autoBtn.addEventListener("click", () => { const on = !AUTO_TIMER; setAuto(on); setStatus(on ? "Auto-refresh enabled (2.5s)" : "Auto-refresh disabled"); });
+      el.searchBtn.addEventListener("click", () => { clearHighlights(); const q = el.searchBox.value.trim().slice(0, MAX_SEARCH_LENGTH); if (!q) { setStatus("Search cleared."); return; } highlightMatches(q); });
+      el.clearSearchBtn.addEventListener("click", () => { el.searchBox.value = ""; clearHighlights(); setStatus("Search cleared."); });
+      el.searchBox.addEventListener("keydown", (e) => { if (e.key === "Enter") el.searchBtn.click(); if (e.key === "Escape") el.clearSearchBtn.click(); });
+      setupTOCKeyboard();
+      setAuto(false);
+    } catch (err) {
+      console.error("Initialization error:", err);
+      el.contentWrapper.innerHTML = `<div class="block-error"><strong>Failed to initialize.</strong><br><br>Make sure:<ul><li>The folder is served via HTTP</li><li>The spec JSON file exists</li></ul><br>Error: <code>${escapeHtml(err?.message || String(err))}</code></div>`;
+      setStatus("Initialization failed.");
+    }
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
