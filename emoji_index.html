@@ -1,0 +1,421 @@
+{
+  "meta": {
+    "name": "Structured Textbook Emoji Index",
+    "version": "2.0.0",
+    "purpose": "Semantic markers for plain-text authored textbooks rendered dynamically",
+    "authoring_principle": "Emoji indicates intent, not decoration",
+    "global_rules": {
+      "marker_definition": "first non-space character is a registered emoji (optionally multiple emojis)",
+      "continuation_rule": "non-marker lines belong to the currently open block",
+      "implicit_body_block": "if no block is open, create a default body paragraph block",
+      "multi_emoji_rule": {
+        "primary": "first emoji controls scope and behavior",
+        "secondary": "subsequent emojis attach as tags"
+      },
+      "indentation_rule": "2 spaces = 1 nesting level for visual hierarchy"
+    },
+    "behavior_language": {
+      "call": "function name",
+      "value": "optional argument",
+      "notes": "Renderer processes behaviors in order; some are visual, some are structural."
+    },
+    "defaults": {
+      "indent_unit": 1,
+      "spacing_unit": 1,
+      "collapse_default": "open",
+      "emphasis_default": "medium",
+      "list_default": "bullet"
+    },
+    "fence_tokens": {
+      "open": "{{{",
+      "close": "}}}"
+    },
+    "categories": {
+      "structure": "Document hierarchy (chapters, sections, navigation)",
+      "academic": "Formal scholarly content (proofs, citations, laws)",
+      "pedagogy": "Teaching elements (problems, examples, experiments)",
+      "voice": "Author commentary and asides",
+      "metadata": "Hidden configuration and notes",
+      "media": "Rich media content (images, LaTeX)"
+    }
+  },
+
+  "structure": {
+    "📘": {
+      "name": "Chapter",
+      "level": "chapter",
+      "render": "block-header",
+      "toc": true,
+      "toc_behavior": { "numbered": true, "depth": 1 },
+      "visibility": { "student": true, "instructor": true },
+      "scope": { "mode": "line" },
+      "behavior": [
+        { "call": "spacing", "value": 3 },
+        { "call": "align", "value": "center" },
+        { "call": "bold" },
+        { "call": "emphasis", "value": "high" },
+        { "call": "divider", "value": "chapter" },
+        { "call": "id" }
+      ]
+    },
+    "📚": {
+      "name": "Section",
+      "level": "section",
+      "render": "section-header",
+      "toc": true,
+      "toc_behavior": { "numbered": true, "depth": 2 },
+      "visibility": { "student": true, "instructor": true },
+      "scope": { "mode": "line" },
+      "behavior": [
+        { "call": "spacing", "value": 2 },
+        { "call": "bold" },
+        { "call": "emphasis", "value": "medium" },
+        { "call": "divider", "value": "section" },
+        { "call": "id" }
+      ]
+    },
+    "🚩": {
+      "name": "Objectives",
+      "render": "callout",
+      "visibility": { "student": true, "instructor": true },
+      "scope": { "mode": "block" },
+      "behavior": [
+        { "call": "box", "value": "objectives" },
+        { "call": "icon", "value": "🎯" },
+        { "call": "list", "value": "bullet" },
+        { "call": "tag", "value": "objectives" },
+        { "call": "id" }
+      ]
+    },
+    "⏮️": {
+      "name": "Looking Back",
+      "render": "callout",
+      "visibility": { "student": true, "instructor": true },
+      "scope": { "mode": "block" },
+      "behavior": [
+        { "call": "box", "value": "review" },
+        { "call": "icon", "value": "↩️" },
+        { "call": "collapse", "value": "closed" },
+        { "call": "tag", "value": "review" },
+        { "call": "id" }
+      ]
+    },
+    "🧭": {
+      "name": "Roadmap",
+      "render": "callout",
+      "visibility": { "student": true, "instructor": true },
+      "scope": { "mode": "block" },
+      "behavior": [
+        { "call": "box", "value": "subtle" },
+        { "call": "list", "value": "bullet" },
+        { "call": "tag", "value": "roadmap" },
+        { "call": "id" }
+      ]
+    }
+  },
+
+  "academic": {
+    "🔏": {
+      "name": "Proof",
+      "render": "proof",
+      "visibility": { "student": true, "instructor": true },
+      "scope": { "mode": "block" },
+      "behavior": [
+        { "call": "indent", "value": 1 },
+        { "call": "box", "value": "theorem" },
+        { "call": "formula" },
+        { "call": "collapse", "value": "closed" },
+        { "call": "tombstone" },
+        { "call": "tag", "value": "proof" },
+        { "call": "id" }
+      ]
+    },
+    "🧮": {
+      "name": "Statistics",
+      "render": "math-block",
+      "visibility": { "student": true, "instructor": true },
+      "scope": { "mode": "block" },
+      "behavior": [
+        { "call": "indent", "value": 1 },
+        { "call": "formula" },
+        { "call": "tag", "value": "stats" },
+        { "call": "id" }
+      ]
+    },
+    "📜": {
+      "name": "Citation",
+      "render": "citation",
+      "visibility": { "student": true, "instructor": true },
+      "scope": { "mode": "block" },
+      "behavior": [
+        { "call": "box", "value": "citation" },
+        { "call": "italic" },
+        { "call": "tag", "value": "citation" },
+        { "call": "id" }
+      ]
+    },
+    "⚖️": {
+      "name": "Law",
+      "render": "legal-block",
+      "visibility": { "student": true, "instructor": true },
+      "scope": { "mode": "block" },
+      "behavior": [
+        { "call": "box", "value": "warning" },
+        { "call": "icon", "value": "⚖️" },
+        { "call": "smallcaps" },
+        { "call": "tag", "value": "law" },
+        { "call": "id" }
+      ]
+    },
+    "🧲": {
+      "name": "Physics",
+      "render": "science-block",
+      "visibility": { "student": true, "instructor": true },
+      "scope": { "mode": "block" },
+      "behavior": [
+        { "call": "formula" },
+        { "call": "tag", "value": "physics" },
+        { "call": "id" }
+      ]
+    },
+    "💳": {
+      "name": "Debit / Credit",
+      "render": "accounting-block",
+      "visibility": { "student": true, "instructor": true },
+      "scope": { "mode": "block" },
+      "behavior": [
+        { "call": "box", "value": "subtle" },
+        { "call": "highlight", "value": "gray" },
+        { "call": "tag", "value": "debit-credit" },
+        { "call": "id" }
+      ]
+    },
+    "🗝️": {
+      "name": "Key Vocabulary",
+      "render": "definition-block",
+      "visibility": { "student": true, "instructor": true },
+      "scope": { "mode": "block" },
+      "behavior": [
+        { "call": "box", "value": "vocab" },
+        { "call": "icon", "value": "📖" },
+        { "call": "highlight", "value": "yellow" },
+        { "call": "tag", "value": "vocab" },
+        { "call": "id" }
+      ]
+    },
+    "📖": {
+      "name": "Definition",
+      "render": "definition",
+      "visibility": { "student": true, "instructor": true },
+      "scope": { "mode": "block" },
+      "behavior": [
+        { "call": "box", "value": "definition" },
+        { "call": "bold", "range": "first-line" },
+        { "call": "tag", "value": "definition" },
+        { "call": "id" }
+      ]
+    },
+    "🔬": {
+      "name": "Theorem",
+      "render": "theorem",
+      "visibility": { "student": true, "instructor": true },
+      "scope": { "mode": "block" },
+      "behavior": [
+        { "call": "box", "value": "theorem" },
+        { "call": "numbered", "value": "theorem" },
+        { "call": "tag", "value": "theorem" },
+        { "call": "id" }
+      ]
+    }
+  },
+
+  "pedagogy": {
+    "✏️": {
+      "name": "In-Class Problem",
+      "render": "exercise",
+      "visibility": { "student": true, "instructor": true },
+      "scope": { "mode": "block" },
+      "behavior": [
+        { "call": "box", "value": "exercise" },
+        { "call": "icon", "value": "✏️" },
+        { "call": "list", "value": "numbered" },
+        { "call": "difficulty", "value": "medium" },
+        { "call": "tag", "value": "inclass" },
+        { "call": "id" }
+      ]
+    },
+    "📝": {
+      "name": "Homework",
+      "render": "assignment",
+      "visibility": { "student": true, "instructor": true },
+      "scope": { "mode": "block" },
+      "behavior": [
+        { "call": "box", "value": "homework" },
+        { "call": "icon", "value": "📝" },
+        { "call": "list", "value": "numbered" },
+        { "call": "difficulty", "value": "medium" },
+        { "call": "tag", "value": "homework" },
+        { "call": "id" }
+      ]
+    },
+    "❓": {
+      "name": "Example",
+      "render": "example",
+      "visibility": { "student": true, "instructor": true },
+      "scope": { "mode": "block" },
+      "behavior": [
+        { "call": "box", "value": "example" },
+        { "call": "numbered", "value": "example" },
+        { "call": "tag", "value": "example" },
+        { "call": "id" }
+      ]
+    },
+    "📊": {
+      "name": "Visual Data",
+      "render": "visual-block",
+      "visibility": { "student": true, "instructor": true },
+      "scope": { "mode": "fenced" },
+      "behavior": [
+        { "call": "figure" },
+        { "call": "caption" },
+        { "call": "tag", "value": "visual" },
+        { "call": "id" }
+      ]
+    },
+    "🧪": {
+      "name": "Experiment",
+      "render": "experiment-block",
+      "visibility": { "student": true, "instructor": true },
+      "scope": { "mode": "block" },
+      "behavior": [
+        { "call": "box", "value": "experiment" },
+        { "call": "icon", "value": "🧪" },
+        { "call": "collapse", "value": "closed" },
+        { "call": "tag", "value": "experiment" },
+        { "call": "id" }
+      ]
+    },
+    "🧠": {
+      "name": "Mental Model",
+      "render": "insight-block",
+      "visibility": { "student": true, "instructor": true },
+      "scope": { "mode": "block" },
+      "behavior": [
+        { "call": "box", "value": "insight" },
+        { "call": "icon", "value": "💡" },
+        { "call": "italic" },
+        { "call": "tag", "value": "mental-model" },
+        { "call": "id" }
+      ]
+    },
+    "💻": {
+      "name": "Code",
+      "render": "code-block",
+      "visibility": { "student": true, "instructor": true },
+      "scope": { "mode": "fenced" },
+      "behavior": [
+        { "call": "box", "value": "code" },
+        { "call": "monospace" },
+        { "call": "tag", "value": "code" },
+        { "call": "id" }
+      ]
+    }
+  },
+
+  "voice": {
+    "🧾": {
+      "name": "Author Note",
+      "render": "author-note",
+      "visibility": { "student": true, "instructor": true },
+      "scope": { "mode": "block" },
+      "behavior": [
+        { "call": "box", "value": "author" },
+        { "call": "icon", "value": "✏️" },
+        { "call": "italic" },
+        { "call": "tag", "value": "author-note" },
+        { "call": "id" }
+      ]
+    },
+    "📌": {
+      "name": "Quick Insert",
+      "render": "aside",
+      "visibility": { "student": true, "instructor": true },
+      "scope": { "mode": "block" },
+      "behavior": [
+        { "call": "box", "value": "aside" },
+        { "call": "icon", "value": "📌" },
+        { "call": "emphasis", "value": "medium" },
+        { "call": "tag", "value": "aside" },
+        { "call": "id" }
+      ]
+    },
+    "⚠️": {
+      "name": "Warning",
+      "render": "warning",
+      "visibility": { "student": true, "instructor": true },
+      "scope": { "mode": "block" },
+      "behavior": [
+        { "call": "box", "value": "warning" },
+        { "call": "icon", "value": "⚠️" },
+        { "call": "emphasis", "value": "high" },
+        { "call": "tag", "value": "warning" },
+        { "call": "id" }
+      ]
+    },
+    "💡": {
+      "name": "Tip",
+      "render": "tip",
+      "visibility": { "student": true, "instructor": true },
+      "scope": { "mode": "block" },
+      "behavior": [
+        { "call": "box", "value": "tip" },
+        { "call": "icon", "value": "💡" },
+        { "call": "tag", "value": "tip" },
+        { "call": "id" }
+      ]
+    }
+  },
+
+  "media": {
+    "🖋️": {
+      "name": "LaTeX",
+      "render": "latex-block",
+      "visibility": { "student": true, "instructor": true },
+      "scope": { "mode": "fenced" },
+      "behavior": [
+        { "call": "box", "value": "latex" },
+        { "call": "latex" },
+        { "call": "tag", "value": "latex" },
+        { "call": "id" }
+      ]
+    },
+    "🖼️": {
+      "name": "Image",
+      "render": "image-block",
+      "visibility": { "student": true, "instructor": true },
+      "scope": { "mode": "line" },
+      "behavior": [
+        { "call": "image" },
+        { "call": "figure" },
+        { "call": "tag", "value": "image" },
+        { "call": "id" }
+      ]
+    }
+  },
+
+  "metadata": {
+    "🔐": {
+      "name": "Metadata",
+      "render": "meta-block",
+      "visibility": { "student": false, "instructor": true },
+      "scope": { "mode": "fenced" },
+      "behavior": [
+        { "call": "smallcaps" },
+        { "call": "collapse", "value": "closed" },
+        { "call": "instructor-only" },
+        { "call": "tag", "value": "metadata" },
+        { "call": "id" }
+      ]
+    }
+  }
+}
