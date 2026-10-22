@@ -6,8 +6,8 @@
   <title>📘 Textbook Engine</title>
 
   <!-- KaTeX for LaTeX rendering -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" crossorigin="anonymous">
-  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="vendor/katex/katex.min.css">
+  <script src="vendor/katex/katex.min.js"></script>
 
   <style>
     :root {
@@ -801,7 +801,8 @@
         toc: !!entry?.toc,
         toc_behavior: entry?.toc_behavior || null,
         name: entry?.name || emoji,
-        contentLines: firstLineRest ? [firstLineRest] : [],
+        title: entry?.scope?.mode === "fenced" ? firstLineRest : "",
+        contentLines: firstLineRest && entry?.scope?.mode !== "fenced" ? [firstLineRest] : [],
         content: "", children: [], id: null, depth: 0
       };
     };
@@ -995,7 +996,7 @@
       const labelRow = document.createElement("div"); labelRow.className = "labelRow";
       const label = document.createElement("div"); label.className = "label";
       const iconSpan = document.createElement("span"); iconSpan.className = "icon"; iconSpan.textContent = "🖋️"; label.appendChild(iconSpan);
-      const nameSpan = document.createElement("span"); nameSpan.textContent = "LaTeX"; label.appendChild(nameSpan);
+      const nameSpan = document.createElement("span"); nameSpan.textContent = block.title || "LaTeX"; label.appendChild(nameSpan);
       labelRow.appendChild(label); labelRow.appendChild(makeBadges(block)); wrapper.appendChild(labelRow);
       const latexContent = document.createElement("div"); latexContent.className = "latex-content"; latexContent.innerHTML = renderLatex((block.content || "").trim(), true); wrapper.appendChild(latexContent);
       return wrapper;
@@ -1005,7 +1006,7 @@
     const labelRow = document.createElement("div"); labelRow.className = "labelRow";
     const label = document.createElement("div"); label.className = "label";
     if (iconVal) { const iconSpan = document.createElement("span"); iconSpan.className = "icon"; iconSpan.textContent = iconVal; label.appendChild(iconSpan); }
-    const nameSpan = document.createElement("span"); nameSpan.textContent = block.name; label.appendChild(nameSpan);
+    const nameSpan = document.createElement("span"); nameSpan.textContent = block.title || block.name; label.appendChild(nameSpan);
     if (numberedType) { COUNTERS[numberedType] = (COUNTERS[numberedType] || 0) + 1; const numSpan = document.createElement("span"); numSpan.className = "numbered"; numSpan.textContent = `${COUNTERS.chapter}.${COUNTERS[numberedType]}`; label.appendChild(numSpan); }
     labelRow.appendChild(label); labelRow.appendChild(makeBadges(block));
 

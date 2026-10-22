@@ -12,17 +12,27 @@ A lightweight, offline HTML textbook viewer that uses emoji markers for semantic
 - **Student/Instructor views** — Toggle visibility of instructor-only content
 - **Live reload** — Auto-refresh while editing
 - **Dark mode** — Automatic theme based on system preference
-- **Fully offline** — No server required (except for initial KaTeX CDN load)
+- **Offline runtime** — Bundled KaTeX JavaScript, CSS, and fonts; no CDN or internet required when served locally
 
 ## 🚀 Quick Start
 
 1. Download or clone this repo
-2. Create your chapter files (`chapter_1.txt`, `chapter_2.txt`, etc.)
+2. Keep the whole folder, including `vendor/`, `emoji_index.json`, and the two original sample chapters
 3. Serve locally:
    ```bash
-   python -m http.server 8000
+   python3 -m http.server 8000 --bind 127.0.0.1
    ```
-4. Open `http://localhost:8000`
+4. Open `http://127.0.0.1:8000/` (the lowercase `index.html` opens automatically).
+
+The included chapters introduce circle projections, oscillator energy, and harmonic coefficients. They exercise equations, proofs, examples, fenced code, exercises, instructor notes, and cross-chapter navigation. No scans or private research are included.
+
+### Offline behavior
+
+Download the complete repository while connected, then start the local server above. You can disconnect from the internet before the first visit: the reader, chapters, marker specification, and math fonts are all local. A local HTTP server is required because browsers restrict `fetch()` on `file://`; double-clicking the HTML is not supported. This is not a service-worker cache: a remote hosted copy will not remain available after disconnecting unless you download and serve it locally. Custom chapters must also use local media to remain offline.
+
+### Authoring and discovery
+
+Replace or extend `chapter_1.txt`, `chapter_2.txt`, etc., following [AUTHORING_GUIDE.md](AUTHORING_GUIDE.md). The emoji specification and scope rules are unchanged. Discovery probes numbers 1–200, stopping after 12 consecutive missing files once any chapter has been found. Prefer consecutive numbering. Missing probes are normal HTTP 404s; missing selected files produce an explanatory message. Instructor view is a presentation toggle, not protection for confidential material.
 
 ## 📁 Project Structure
 
@@ -33,7 +43,10 @@ textbook-engine/
 ├── chapter_1.txt        # Your chapter files
 ├── chapter_2.txt
 ├── AUTHORING_GUIDE.md   # Instructions for writing chapters
-├── CHANGELOG.md         # Version history
+├── changelogs/          # Version history
+├── vendor/katex/        # KaTeX 0.16.9, fonts, license and provenance
+├── tests/smoke.cjs      # Reproducible browser checks
+├── package.json         # Test tools only; no runtime build step
 └── assets/              # Images folder
     └── diagrams/
         └── example.png
@@ -95,6 +108,22 @@ Simply include the authoring guide in your prompt context and ask the LLM to wri
 | 💡 | Tip | block |
 
 See `AUTHORING_GUIDE.md` for the complete reference.
+
+## Smoke checks
+
+Install test tools once while connected (Node.js 20+):
+
+```bash
+npm ci
+npx playwright install --with-deps chromium
+npm test
+```
+
+The test starts and stops its own local HTTP server and fresh browser context. It blocks every non-local request and asserts that none were attempted. It checks cold startup, two-chapter discovery, inline/display KaTeX, font loading, sidebar navigation, collapsible proofs, literal fenced markers, instructor visibility, a chapter removed after discovery, no chapters at startup, and missing marker specifications. No internet is needed to run after the tools and browser have been installed. To use an existing compatible Chromium binary, set `CHROMIUM_PATH=/path/to/chromium` when running `npm test`.
+
+## Third-party assets
+
+KaTeX 0.16.9 is vendored unchanged from its npm distribution, including every font referenced by its CSS and its MIT license. See [vendor/katex/README.md](vendor/katex/README.md) for provenance and reproducible refresh instructions.
 
 ## 📄 License
 

@@ -1,0 +1,78 @@
+📘 Circles, Projections, and Harmonic Motion
+
+An original miniature textbook. A point travelling around a unit circle gives a geometric model of oscillation. Follow the sections in the sidebar; expand the proof and try the exercises.
+
+📚 From a circle to a coordinate
+
+🚩 Learning Objectives
+Describe a circle using sine and cosine
+Prove conservation of a quadratic energy
+Recover amplitude from initial position and velocity
+
+📖 Unit-circle projection
+For an angle $t$ measured in radians, the point $(\cos t,\sin t)$ lies on the unit circle. Its horizontal projection is $x(t)=\cos t$.
+
+🖋️ Circle identity
+{{{
+\cos^2 t+\sin^2 t=1
+}}}
+
+🧠 Two views of one motion
+Uniform circular motion has constant speed. Its horizontal shadow slows near its turning points and speeds up near the origin.
+
+❓ A quarter turn
+At $t=0$ the projection is $1$. At $t=\pi/2$ it is $0$. At $t=\pi$ it is $-1$.
+
+⚠️ Angles and derivatives
+The derivative formulas here assume radians, not degrees.
+
+📚 An oscillator and its energy
+
+For unit mass and unit stiffness, Newton's equation is $x''+x=0$. Write $v=x'$.
+
+🔬 Conserved energy
+Every twice differentiable real solution of $x''+x=0$ has constant energy $E=(v^2+x^2)/2$.
+
+🔏 Proof by differentiation
+Differentiate along the solution:
+$$\frac{dE}{dt}=v v'+x x'=v(-x)+xv=0.$$
+Therefore $E$ is constant on every interval of the solution.
+
+🖋️ Initial data and solution
+{{{
+x(t)=a\cos t+b\sin t,\qquad x(0)=a,\quad x'(0)=b
+}}}
+
+❓ Recovering amplitude
+For $a=3$ and $b=4$, the amplitude is $\sqrt{a^2+b^2}=5$ and $E=25/2$.
+
+💻 Evaluate the exact solution in JavaScript
+{{{
+function position(t, a, b) {
+  return a * Math.cos(t) + b * Math.sin(t);
+}
+// 📘 Inside this fence the marker is literal text.
+console.log(position(0, 3, 4)); // 3
+}}}
+
+💡 Compare the formulas
+Differentiate the displayed solution twice and substitute into the oscillator equation.
+
+📚 Practice and continuation
+
+✏️ Practice Problems
+Find the energy when $a=1$ and $b=0$.
+Show that $v(t)=-a\sin t+b\cos t$.
+Explain why the amplitude is zero exactly when $a=b=0$.
+
+📝 Homework
+For $x''+\omega^2x=0$ with $\omega>0$, derive the energy $(v^2+\omega^2x^2)/2$ and prove it is constant.
+
+🧭 Next chapter
+Use the chapter selector or sidebar to open Harmonic Analysis and extract coefficients by integration.
+
+🔐 Instructor notes
+{{{
+Original demo answer: the first exercise has energy 1/2.
+These notes demonstrate visibility controls, not access control; chapter source is public.
+}}}

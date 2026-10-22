@@ -1,0 +1,27 @@
+📘 Harmonic Analysis
+
+This second original chapter demonstrates navigation between files.
+
+📚 Measuring a harmonic component
+
+For a real trigonometric polynomial $f$, define sine coefficients $A_n$ and cosine coefficients $B_n$ for integers $n\geq1$.
+
+🖋️ Harmonic analyzers
+{{{
+A_n=\frac{1}{\pi}\int_0^{2\pi}f(t)\sin(nt)\,dt,\qquad B_n=\frac{1}{\pi}\int_0^{2\pi}f(t)\cos(nt)\,dt
+}}}
+
+📖 Orthogonality
+Distinct positive integer sine modes have zero integral product over a full period. Each sine mode has squared integral norm $\pi$.
+
+❓ Reading a coefficient
+For $f(t)=3\cos t+4\sin t$, orthogonality gives $A_1=4$ and $B_1=3$; all coefficients with $n>1$ vanish.
+
+📚 Verify the projection
+
+🔏 The mixed integral vanishes
+Since $2\sin t\cos t=\sin(2t)$, integrating over $[0,2\pi]$ gives $\int_0^{2\pi}\sin t\cos t\,dt=0$.
+
+✏️ Practice Problems
+Compute $A_2$ and $B_2$ for $f(t)=2\sin(2t)-\cos(2t)$.
+Explain why these coefficients do not detect a constant term.
